@@ -1,0 +1,22 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.fluxstick.controller'
+    compileSdk 37
+
+    defaultConfig {
+        applicationId 'com.fluxstick.controller'
+        minSdk 26
+        targetSdk 37
+        versionCode 1
+        versionName '1.0'
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
