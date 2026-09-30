@@ -324,18 +324,20 @@ public class ControllerView extends View {
         float r = cx + w / 2f;
         float b = cy + h / 2f;
 
+        boolean pressed = b(id);
+
         p.setStyle(Paint.Style.FILL);
-        p.setColor(Color.rgb(7, 25, 36));
+        p.setColor(pressed ? Color.rgb(0, 160, 240) : Color.rgb(7, 25, 36));
         c.drawRoundRect(l, t, r, b, 12 * s * elem.scale, 12 * s * elem.scale, p);
 
         p.setStyle(Paint.Style.STROKE);
         p.setStrokeWidth(2 * s);
-        p.setColor(Color.rgb(20, 105, 150));
+        p.setColor(pressed ? Color.rgb(0, 220, 255) : Color.rgb(20, 105, 150));
         c.drawRoundRect(l, t, r, b, 12 * s * elem.scale, 12 * s * elem.scale, p);
 
         text.setTextAlign(Paint.Align.CENTER);
         text.setTextSize(Math.max(12, 22 * elem.scale) * s);
-        text.setColor(Color.rgb(215, 235, 245));
+        text.setColor(pressed ? Color.WHITE : Color.rgb(215, 235, 245));
         c.drawText(labelFor(id), cx, cy + 7 * s * elem.scale, text);
 
         hits.add(new Hit(l, t, r, b, id));
@@ -349,10 +351,11 @@ public class ControllerView extends View {
         else if (elemId.equals("RS")) rightStick.set(bounds);
 
         float cx = bounds.centerX(), cy = bounds.centerY(), rad = bounds.width() / 2f;
+        boolean pressed = b(stickLabel);
 
         p.setStyle(Paint.Style.STROKE);
         p.setStrokeWidth(3 * s);
-        p.setColor(Color.rgb(0, 155, 245));
+        p.setColor(pressed ? Color.rgb(0, 220, 255) : Color.rgb(0, 155, 245));
         c.drawCircle(cx, cy, rad, p);
 
         p.setStrokeWidth(1 * s);
@@ -362,17 +365,17 @@ public class ControllerView extends View {
 
         float kx = cx + vx * rad * 0.52f, ky = cy + vy * rad * 0.52f;
         p.setStyle(Paint.Style.FILL);
-        p.setColor(Color.rgb(10, 25, 35));
+        p.setColor(pressed ? Color.rgb(0, 170, 245) : Color.rgb(10, 25, 35));
         c.drawCircle(kx, ky, rad * 0.19f, p);
 
         p.setStyle(Paint.Style.STROKE);
         p.setStrokeWidth(2 * s);
-        p.setColor(Color.rgb(60, 90, 110));
+        p.setColor(pressed ? Color.WHITE : Color.rgb(60, 90, 110));
         c.drawCircle(kx, ky, rad * 0.19f, p);
 
         text.setTextAlign(Paint.Align.CENTER);
         text.setTextSize(12 * s * elem.scale);
-        text.setColor(Color.rgb(0, 170, 245));
+        text.setColor(pressed ? Color.WHITE : Color.rgb(0, 170, 245));
         text.setTypeface(Typeface.DEFAULT_BOLD);
         c.drawText(stickLabel, cx, cy + rad + 24 * s * elem.scale, text);
 
@@ -393,18 +396,20 @@ public class ControllerView extends View {
     }
 
     private void drawSubButton(Canvas c, float l, float t, float r, float b, String id, float s, float scale) {
+        boolean pressed = b(id);
+
         p.setStyle(Paint.Style.FILL);
-        p.setColor(Color.rgb(7, 25, 36));
+        p.setColor(pressed ? Color.rgb(0, 160, 240) : Color.rgb(7, 25, 36));
         c.drawRoundRect(l, t, r, b, 12 * s * scale, 12 * s * scale, p);
 
         p.setStyle(Paint.Style.STROKE);
         p.setStrokeWidth(2 * s);
-        p.setColor(Color.rgb(20, 105, 150));
+        p.setColor(pressed ? Color.rgb(0, 220, 255) : Color.rgb(20, 105, 150));
         c.drawRoundRect(l, t, r, b, 12 * s * scale, 12 * s * scale, p);
 
         text.setTextAlign(Paint.Align.CENTER);
         text.setTextSize(Math.max(12, 18 * scale) * s);
-        text.setColor(Color.rgb(215, 235, 245));
+        text.setColor(pressed ? Color.WHITE : Color.rgb(215, 235, 245));
         c.drawText(labelFor(id), (l + r) / 2f, (t + b) / 2f + 6 * s * scale, text);
 
         hits.add(new Hit(l, t, r, b, id));
@@ -423,20 +428,22 @@ public class ControllerView extends View {
         face(c, cx, cy + offset, "A", Color.rgb(35, 220, 125), s, scale);
     }
 
-    private void face(Canvas c, float cx, float cy, String id, int color, float s, float scale) {
+    private void face(Canvas c, float cx, float cy, String id, int defaultColor, float s, float scale) {
         float r = 34 * s * scale;
+        boolean pressed = b(id);
+
         p.setStyle(Paint.Style.FILL);
-        p.setColor(Color.rgb(4, 18, 28));
+        p.setColor(pressed ? defaultColor : Color.rgb(4, 18, 28));
         c.drawCircle(cx, cy, r, p);
 
         p.setStyle(Paint.Style.STROKE);
         p.setStrokeWidth(2 * s);
-        p.setColor(Color.rgb(15, 95, 140));
+        p.setColor(pressed ? Color.WHITE : Color.rgb(15, 95, 140));
         c.drawCircle(cx, cy, r, p);
 
         text.setTextAlign(Paint.Align.CENTER);
         text.setTextSize(18 * s * scale);
-        text.setColor(color);
+        text.setColor(pressed ? Color.rgb(10, 15, 20) : defaultColor);
         c.drawText(id, cx, cy + 6 * s * scale, text);
 
         hits.add(new Hit(cx - r, cy - r, cx + r, cy + r, id));
@@ -448,19 +455,20 @@ public class ControllerView extends View {
         float cx = elem.x * s, cy = elem.y * s;
         float scale = elem.scale;
         float r = (id.equals("MODE") ? 30f : 25f) * scale * s;
+        boolean pressed = b(id);
 
         p.setStyle(Paint.Style.FILL);
-        p.setColor(Color.rgb(4, 18, 28));
+        p.setColor(pressed ? Color.rgb(0, 160, 240) : Color.rgb(4, 18, 28));
         c.drawCircle(cx, cy, r, p);
 
         p.setStyle(Paint.Style.STROKE);
         p.setStrokeWidth(2 * s);
-        p.setColor(Color.rgb(20, 105, 150));
+        p.setColor(pressed ? Color.rgb(0, 220, 255) : Color.rgb(20, 105, 150));
         c.drawCircle(cx, cy, r, p);
 
         text.setTextAlign(Paint.Align.CENTER);
         text.setTextSize((id.equals("MODE") ? 10 : 16) * scale * s);
-        text.setColor(Color.LTGRAY);
+        text.setColor(pressed ? Color.WHITE : Color.LTGRAY);
         c.drawText(label, cx, cy + 5 * s * scale, text);
 
         hits.add(new Hit(cx - r, cy - r, cx + r, cy + r, id));
@@ -567,29 +575,67 @@ public class ControllerView extends View {
             }
         }
 
-        if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN ||
-                action == MotionEvent.ACTION_MOVE) {
-            for (int i = 0; i < e.getPointerCount(); i++) {
-                float px = e.getX(i), py = e.getY(i);
-                handlePointer(px, py, true);
+        // Toggles for MODE and GYRO
+        if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN) {
+            int idx = e.getActionIndex();
+            float px = e.getX(idx);
+            float py = e.getY(idx);
+            for (Hit h : hits) {
+                if (h.contains(px, py)) {
+                    if (h.id.equals("MODE")) mouse = !mouse;
+                    else if (h.id.equals("GYRO")) gyro = !gyro;
+                }
             }
-            invalidate();
-            send();
-            return true;
         }
 
-        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_POINTER_UP ||
-                action == MotionEvent.ACTION_CANCEL) {
-            if (action == MotionEvent.ACTION_UP) {
-                for (String k : new ArrayList<>(buttons.keySet())) buttons.put(k, false);
-                lx = ly = rx = ry = 0;
-            } else {
-                handlePointer(x, y, false);
+        // Handle button and joystick touch tracking across all pointers
+        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            if (e.getPointerCount() <= 1) {
+                buttons.replaceAll((k, v) -> false);
+                lx = 0; ly = 0; rx = 0; ry = 0;
+                invalidate();
+                send();
+                return true;
             }
-            invalidate();
-            send();
-            return true;
         }
+
+        buttons.replaceAll((k, v) -> false);
+        boolean newLx = false, newRx = false;
+
+        for (int i = 0; i < e.getPointerCount(); i++) {
+            if (action == MotionEvent.ACTION_POINTER_UP && i == e.getActionIndex()) {
+                continue;
+            }
+
+            float px = e.getX(i);
+            float py = e.getY(i);
+
+            if (leftStick.contains(px, py)) {
+                lx = Math.max(-1, Math.min(1, (px - leftStick.centerX()) / (leftStick.width() / 2f)));
+                ly = Math.max(-1, Math.min(1, (py - leftStick.centerY()) / (leftStick.height() / 2f)));
+                newLx = true;
+            }
+
+            if (rightStick.contains(px, py)) {
+                rx = Math.max(-1, Math.min(1, (px - rightStick.centerX()) / (rightStick.width() / 2f)));
+                ry = Math.max(-1, Math.min(1, (py - rightStick.centerY()) / (rightStick.height() / 2f)));
+                newRx = true;
+            }
+
+            for (Hit h : hits) {
+                if (h.contains(px, py)) {
+                    if (!h.id.equals("SETTINGS") && !h.id.equals("MODE") && !h.id.equals("GYRO")) {
+                        buttons.put(h.id, true);
+                    }
+                }
+            }
+        }
+
+        if (!newLx) { lx = 0; ly = 0; }
+        if (!newRx) { rx = 0; ry = 0; }
+
+        invalidate();
+        send();
         return true;
     }
 
@@ -694,33 +740,6 @@ public class ControllerView extends View {
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
             isDragging = false;
             invalidate();
-        }
-    }
-
-    private void handlePointer(float x, float y, boolean down) {
-        // Sticks
-        if (leftStick.contains(x, y)) {
-            lx = Math.max(-1, Math.min(1, (x - leftStick.centerX()) / (leftStick.width() / 2f)));
-            ly = Math.max(-1, Math.min(1, (y - leftStick.centerY()) / (leftStick.height() / 2f)));
-            if (!down) { lx = ly = 0; }
-            return;
-        }
-        if (rightStick.contains(x, y)) {
-            rx = Math.max(-1, Math.min(1, (x - rightStick.centerX()) / (rightStick.width() / 2f)));
-            ry = Math.max(-1, Math.min(1, (y - rightStick.centerY()) / (rightStick.height() / 2f)));
-            if (!down) { rx = ry = 0; }
-            return;
-        }
-        for (Hit h : hits) {
-            if (h.contains(x, y)) {
-                if (h.id.equals("MODE")) {
-                    if (down) mouse = !mouse;
-                } else if (h.id.equals("GYRO")) {
-                    if (down) gyro = !gyro;
-                } else if (!h.id.equals("SETTINGS")) {
-                    buttons.put(h.id, down);
-                }
-            }
         }
     }
 
