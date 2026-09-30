@@ -88,8 +88,9 @@ public class ControllerView extends View {
         RectF r;
         String id;
 
-        Hit(float l, float t, float rr, float b, String i) {
-            r = new RectF(l, t, rr, b);
+        Hit(float l, float t, float rr, float b, String i, float s) {
+            float pad = 16f * s;
+            r = new RectF(l - pad, t - pad, rr + pad, b + pad);
             id = i;
         }
 
@@ -309,7 +310,7 @@ public class ControllerView extends View {
         text.setTextAlign(Paint.Align.RIGHT);
         c.drawText("⚙", getWidth() - 22 * s, 43 * s, text);
 
-        hits.add(new Hit(getWidth() - 80 * s, 0, getWidth(), 60 * s, "SETTINGS"));
+        hits.add(new Hit(getWidth() - 80 * s, 0, getWidth(), 60 * s, "SETTINGS", s));
     }
 
     private void drawElementButton(Canvas c, String id, float s) {
@@ -340,7 +341,7 @@ public class ControllerView extends View {
         text.setColor(pressed ? Color.WHITE : Color.rgb(215, 235, 245));
         c.drawText(labelFor(id), cx, cy + 7 * s * elem.scale, text);
 
-        hits.add(new Hit(l, t, r, b, id));
+        hits.add(new Hit(l, t, r, b, id, s));
     }
 
     private void drawElementStick(Canvas c, String elemId, String stickLabel, float vx, float vy, float s) {
@@ -379,7 +380,7 @@ public class ControllerView extends View {
         text.setTypeface(Typeface.DEFAULT_BOLD);
         c.drawText(stickLabel, cx, cy + rad + 24 * s * elem.scale, text);
 
-        hits.add(new Hit(bounds.left, bounds.top, bounds.right, bounds.bottom, stickLabel));
+        hits.add(new Hit(bounds.left, bounds.top, bounds.right, bounds.bottom, stickLabel, s));
     }
 
     private void drawDpad(Canvas c, float s) {
@@ -412,7 +413,7 @@ public class ControllerView extends View {
         text.setColor(pressed ? Color.WHITE : Color.rgb(215, 235, 245));
         c.drawText(labelFor(id), (l + r) / 2f, (t + b) / 2f + 6 * s * scale, text);
 
-        hits.add(new Hit(l, t, r, b, id));
+        hits.add(new Hit(l, t, r, b, id, s));
     }
 
     private void drawFace(Canvas c, float s) {
@@ -446,7 +447,7 @@ public class ControllerView extends View {
         text.setColor(pressed ? Color.rgb(10, 15, 20) : defaultColor);
         c.drawText(id, cx, cy + 6 * s * scale, text);
 
-        hits.add(new Hit(cx - r, cy - r, cx + r, cy + r, id));
+        hits.add(new Hit(cx - r, cy - r, cx + r, cy + r, id, s));
     }
 
     private void drawCircleButtonElement(Canvas c, String id, String label, float s) {
@@ -471,7 +472,7 @@ public class ControllerView extends View {
         text.setColor(pressed ? Color.WHITE : Color.LTGRAY);
         c.drawText(label, cx, cy + 5 * s * scale, text);
 
-        hits.add(new Hit(cx - r, cy - r, cx + r, cy + r, id));
+        hits.add(new Hit(cx - r, cy - r, cx + r, cy + r, id, s));
     }
 
     private String labelFor(String id) {

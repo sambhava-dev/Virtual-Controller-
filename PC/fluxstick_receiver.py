@@ -9,7 +9,14 @@ sock.bind((HOST, PORT))
 print(f"FluxStick receiver listening on UDP {PORT}")
 
 def pressed(d, k):
-    return bool(d.get(k, False))
+    val = d.get(k, False)
+    if isinstance(val, bool):
+        return val
+    if isinstance(val, (int, float)):
+        return val > 0.5
+    if isinstance(val, str):
+        return val.lower() in ("true", "1", "yes")
+    return False
 
 mapping = {
     "a": vg.XUSB_BUTTON.XUSB_GAMEPAD_A,
@@ -30,10 +37,19 @@ mapping = {
     "guide": vg.XUSB_BUTTON.XUSB_GAMEPAD_GUIDE,
 }
 
+count = 0
 while True:
     data, addr = sock.recvfrom(8192)
     try:
         d = json.loads(data.decode("utf-8"))
+        count += 1
+
+        active = [k for k in mapping.keys() if pressed(d, k)]
+        if pressed(d, "lt"): active.append("lt")
+        if pressed(d, "rt"): active.append("rt")
+
+        if active:
+            print(f"[{count}] Active inputs from {addr[0]}: {active}")
 
         # Joysticks
         gamepad.left_joystick_float(
