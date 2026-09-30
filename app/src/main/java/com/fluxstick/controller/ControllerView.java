@@ -11,6 +11,7 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ControllerView extends View {
     private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -19,10 +20,13 @@ public class ControllerView extends View {
     private final Paint editPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private final ExecutorService net = Executors.newSingleThreadExecutor();
+    private final AtomicBoolean isSending = new AtomicBoolean(false);
     private DatagramSocket socket;
     private InetAddress pc;
     private final int port = 26760;
     private String pcIp = "192.168.0.103";
+    private long packetsSent = 0;
+    private String lastError = null;
 
     private float sx, sy;
     private final HashMap<String, Boolean> buttons = new HashMap<>();
@@ -166,16 +170,23 @@ public class ControllerView extends View {
                 }
                 socket = new DatagramSocket();
                 pc = InetAddress.getByName(pcIp);
-            } catch (Exception ignored) {
+                lastError = null;
+            } catch (Exception e) {
+                lastError = e.getMessage() != null ? e.getMessage() : "Network Init Error";
             }
         });
     }
 
     private void send() {
         if (isEditMode) return;
+        if (!isSending.compareAndSet(false, true)) return;
+
         net.execute(() -> {
             try {
-                if (socket == null || pc == null) return;
+                if (socket == null || pc == null) {
+                    if (pc == null) pc = InetAddress.getByName(pcIp);
+                    if (socket == null || socket.isClosed()) socket = new DatagramSocket();
+                }
                 String json = "{\"lx\":" + fmt(lx) + ",\"ly\":" + fmt(ly) +
                         ",\"rx\":" + fmt(rx) + ",\"ry\":" + fmt(ry) +
                         ",\"a\":" + b("A") + ",\"b\":" + b("B") + ",\"x\":" + b("X") + ",\"y\":" + b("Y") +
@@ -187,7 +198,12 @@ public class ControllerView extends View {
                         ",\"gyro\":" + gyro + ",\"mouse\":" + mouse + "}";
                 byte[] data = json.getBytes(StandardCharsets.UTF_8);
                 socket.send(new DatagramPacket(data, data.length, pc, port));
-            } catch (Exception ignored) {
+                packetsSent++;
+                lastError = null;
+            } catch (Exception e) {
+                lastError = e.getMessage() != null ? e.getMessage() : "Send Failed";
+            } finally {
+                isSending.set(false);
             }
         });
     }
@@ -254,15 +270,22 @@ public class ControllerView extends View {
 
         // Bottom indicators
         text.setTextSize(14 * s);
-        text.setColor(Color.rgb(0, 210, 150));
-        text.setTextAlign(Paint.Align.LEFT);
-        c.drawText("● ONLINE / UDP (" + pcIp + ")", 20 * s, (getHeight() - 22 * s), text);
+        if (lastError == null) {
+            text.setColor(Color.rgb(0, 210, 150));
+            text.setTextAlign(Paint.Align.LEFT);
+            c.drawText("● UDP (" + pcIp + ":" + port + ") | " + packetsSent + " pkts", 20 * s, (getHeight() - 22 * s), text);
+        } else {
+            text.setColor(Color.rgb(255, 90, 90));
+            text.setTextAlign(Paint.Align.LEFT);
+            c.drawText("● ERR (" + pcIp + "): " + lastError, 20 * s, (getHeight() - 22 * s), text);
+        }
+
         text.setColor(Color.rgb(110, 130, 145));
         text.setTextAlign(Paint.Align.CENTER);
         c.drawText(gyro ? "● GYRO LOOK" : "○ GYRO LOOK", 850 * s, getHeight() - 22 * s, text);
         c.drawText(mouse ? "● MOUSE MODE" : "○ MOUSE MODE", 1060 * s, getHeight() - 22 * s, text);
         text.setTextAlign(Paint.Align.RIGHT);
-        c.drawText("PING --", getWidth() - 20 * s, getHeight() - 22 * s, text);
+        c.drawText("PORT 26760", getWidth() - 20 * s, getHeight() - 22 * s, text);
 
         // Draw Layout Editor overlay when active
         if (isEditMode) {
@@ -703,7 +726,12 @@ public class ControllerView extends View {
 
     private void showSettingsDialog() {
         post(() -> {
-            String[] options = {"✏️ Edit Controller Layout", "🌐 Change PC IP Address (" + pcIp + ")", "🔄 Reset Layout to Default"};
+            String[] options = {
+                    "✏️ Edit Controller Layout",
+                    "🌐 Change PC IP Address (" + pcIp + ")",
+                    "⚡ Reconnect / Reset Network",
+                    "🔄 Reset Layout to Default"
+            };
             new AlertDialog.Builder(getContext())
                     .setTitle("FluxStick Options")
                     .setItems(options, (dialog, which) -> {
@@ -714,6 +742,10 @@ public class ControllerView extends View {
                         } else if (which == 1) {
                             showIpDialog();
                         } else if (which == 2) {
+                            startNetwork();
+                            Toast.makeText(getContext(), "Reconnecting to " + pcIp + "...", Toast.LENGTH_SHORT).show();
+                            invalidate();
+                        } else if (which == 3) {
                             resetLayout();
                             Toast.makeText(getContext(), "Layout reset to default", Toast.LENGTH_SHORT).show();
                             invalidate();
